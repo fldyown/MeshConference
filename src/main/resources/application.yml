@@ -1,0 +1,56 @@
+spring:
+  redis:
+    host: 47.52.131.122
+    port: 6379
+    lettuce:
+      pool:
+        max-idle: 2
+        min-idle: 0
+        max-active: 2
+    password: 123457
+    #f0d5cc13ace35a044e324b5e545e0f43cad9181ddcb22367c1decf3ca78eb968
+
+  data:
+    mongodb:
+      uri: mongodb://mongoadmin:123457@47.52.131.122:27017/admin?authSource=mongoadmin&authMechanism=SCRAM-SHA-1
+      #98799be9f6107236daa290b88cb974e20292854946aaaaa996439e637d76ccf5
+
+  logging:
+    level:
+      org.springframework.data.mongodb.core.index: OFF
+
+  mail:
+    host: smtp.163.com
+    username: workerinchina@163.com
+    password: JZQ520
+
+# MQTT server parameters
+mqtt:
+  host: 127.0.0.1
+  port: 1883
+  ws_port: 8083
+  timeout: 10000
+  leak_level: DISABLED
+  boss_count: 1
+  worker_count: 6
+  max_payload_size: 65536
+
+socket:
+  host: 0.0.0.0
+  port: 7777
+  length: 10240000
+  boss: 1
+  work: 10
+  custom: true
+  upgrade: 10000
+  timeout: 11000
+  ping: 60000
+
+#jwt:
+#  header: jwtHeader
+#  secret: 1234
+#  expiration: 120000   #毫秒
+#  route:
+#    login: /auth/login
+#    refresh: /auth/refresh
+#    register: /auth/register
