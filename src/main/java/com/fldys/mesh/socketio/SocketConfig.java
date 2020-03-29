@@ -5,9 +5,12 @@ import com.corundumstudio.socketio.annotation.SpringAnnotationScanner;
 import com.corundumstudio.socketio.listener.ExceptionListener;
 import io.netty.channel.ChannelHandlerContext;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 
+import java.net.URLDecoder;
+import java.util.Base64;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -44,47 +47,40 @@ public class SocketConfig {
         socketConfig.setTcpNoDelay(true);
         socketConfig.setSoLinger(0);
         configuration.setSocketConfig(socketConfig);
-        configuration.setTransports(Transport.WEBSOCKET);
-
-//        configuration.setKeyStorePassword("test1234");
-//        InputStream stream = new FileInputStream(new File("/home/soft/keystore.jks"));
-        log.info("host:" + host);
-//        configuration.setHostname(host);
+        configuration.setTransports(Transport.WEBSOCKET, Transport.POLLING);
         configuration.setPort(port);
-        configuration.setOrigin("http://192.168.31.30:7777");
-        configuration.setExceptionListener(new ExceptionListener() {
+//        configuration.setOrigin("http://192.168.31.30:7777");
+        configuration.setPingInterval(ping);
+        configuration.setPingTimeout(timeout);
+        configuration.setAllowCustomRequests(custom);
+        configuration.setUpgradeTimeout(upgrade);
+        configuration.setBossThreads(boss);
+        configuration.setWorkerThreads(work);
+        configuration.setMaxHttpContentLength(length);
+        configuration.setMaxFramePayloadLength(length);
+        configuration.setAuthorizationListener(new AuthorizationListener() {
             @Override
-            public void onEventException(Exception e, List<Object> args, SocketIOClient client) {
-                log.info("onEventException1:" + e.getMessage());
-            }
-
-            @Override
-            public void onDisconnectException(Exception e, SocketIOClient client) {
-                log.info("onEventException2:" + e.getMessage());
-            }
-
-            @Override
-            public void onConnectException(Exception e, SocketIOClient client) {
-                log.info("onEventException3:" + e.getMessage());
-            }
-
-            @Override
-            public void onPingException(Exception e, SocketIOClient client) {
-                log.info("onEventException4:" + e.getMessage());
-            }
-
-            @Override
-            public boolean exceptionCaught(ChannelHandlerContext ctx, Throwable e) throws Exception {
-                log.info("onEventException5:" + e.getMessage());
-                return true;
+            public boolean isAuthorized(HandshakeData data) {
+                try {
+                    String did = data.getSingleUrlParam("did");
+                    log.info("did:" + did);
+//                    String d = new String(Base64.getDecoder().decode(URLDecoder.decode(did)), "UTF-8");
+                    String d = URLDecoder.decode(did);
+                    if (d.length() < 36) {
+                        return false;
+                    }
+                    return true;
+                } catch (Exception e) {
+                    log.error(e.getMessage());
+                }
+                return false;
             }
         });
-
         return new SocketIOServer(configuration);
     }
 
     /**
-     * 用于扫描netty-socketio的注解，比如 @OnConnect、@OnEvent
+     * 用于扫描nettysocketio的注解，比如 @OnConnect、@OnEvent
      */
     @Bean
     public SpringAnnotationScanner springAnnotationScanner() {

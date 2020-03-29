@@ -14,7 +14,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
-//@Service
+//@SERVICE
 public class SessionService {
     //hash//clientId->username
     public static final String USER_ONLINE_KEY = "user_online_key";

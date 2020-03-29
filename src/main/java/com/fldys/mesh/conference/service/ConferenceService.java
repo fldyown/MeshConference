@@ -3,11 +3,10 @@ package com.fldys.mesh.conference.service;
 import com.corundumstudio.socketio.AckRequest;
 import com.corundumstudio.socketio.SocketIOClient;
 import com.corundumstudio.socketio.annotation.OnEvent;
-import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fldys.mesh.conference.domain.Conference;
 import com.fldys.mesh.conference.domain.Member;
-import com.fldys.mesh.conference.domain.State;
-import com.fldys.mesh.connection.ConnectService;
+import com.fldys.mesh.device.domain.Device;
+import com.fldys.mesh.device.service.DeviceService;
 import com.fldys.mesh.protocol.Message;
 import com.fldys.mesh.protocol.Type;
 import com.fldys.mesh.socketio.SocketService;
@@ -17,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -27,46 +25,31 @@ public class ConferenceService {
     @Autowired
     Gson gson;
     @Autowired
-    SocketService service;
+    SocketService socketService;
     @Autowired
-    ConnectService connectService;
-//    @Autowired
-//    ConferenceRepository repository;
+    DeviceService deviceService;
 
-    HashMap<String, Conference> conferences = new HashMap<>();
+    private HashMap<String, Conference> conferences = new HashMap<>();
 
-    @OnEvent(value = "conference")
+    @OnEvent(value = ConferenceApi.SERVICE)
     public void event(SocketIOClient client, Message message, AckRequest ackSender) {
         log.info("conference data:" + message);
-
         switch (message.api) {
             case ConferenceApi.CREATE:
-
                 create(client, message, ackSender);
-
                 break;
             case ConferenceApi.DESTROY:
-
                 destroy(client, message, ackSender);
-
                 break;
             case ConferenceApi.JOIN:
-
                 join(client, message, ackSender);
-
                 break;
             case ConferenceApi.QUIT:
-
                 quit(client, message, ackSender);
-
-            case ConferenceApi.SDP:
-
-                sdp(client, message, ackSender);
                 break;
-
+            case ConferenceApi.SDP:
             case ConferenceApi.CANDIDATE:
-
-                candidate(client, message, ackSender);
+                route(client, message, ackSender);
                 break;
             default:
                 break;
@@ -74,136 +57,139 @@ public class ConferenceService {
     }
 
     public void create(SocketIOClient client, Message message, AckRequest ackSender) {
+        Device device = deviceService.sessions.get(client.getSessionId().toString());
         Object obj = message.data.get("conference");
-        Conference conference = init(gson.fromJson(obj.toString(), Conference.class), client);
-        log.info("conference:55555:" + conference);
-        log.info("conference:" + conference.toString());
-        client.joinRoom(conference.id);
-
-        Member from = init(client);
-
+        Conference conference = init(gson.fromJson(obj.toString(), Conference.class), device);
         conferences.put(conference.id, conference);
-
+        client.joinRoom(conference.id);
+        Member from = init(device, conference);
         message.data.put("conference", conference);
         message.data.put("from", from);
-        message.type = Type.Ack.code;
 
         log.info("message:" + message.toString());
-        //ack
-        ackSender.sendAckData(message);
 
-        //sync
-        if (!StringUtils.isEmpty(from.uid)) {
-            message.type = Type.Sync.code;
-            service.getServer().getRoomOperations(from.uid).sendEvent(ConferenceApi.BASE, message);
-        }
-
-        //notify
-        message.type = Type.Notify.code;
-        service.getServer().getRoomOperations(conference.id).sendEvent(ConferenceApi.BASE, message);
+        ackSyncNotify(device, conference, message, ackSender);
     }
 
     public void destroy(SocketIOClient client, Message message, AckRequest ackSender) {
+        Device device = deviceService.sessions.get(client.getSessionId().toString());
         String cid = (String) message.data.get("cid");
         Conference conference = conferences.get(cid);
         conference.destroyed = System.currentTimeMillis();
-        conference.state = State.destroy;
-//        conference = repository.save(conference);
 
-        Member from = new Member();
-        from.did = client.getSessionId().toString();
+        Member from = conference.getMembers().get(device.did);
 
         message.data.put("conference", conference);
         message.data.put("from", from);
 
-        //ack
-        ackSender.sendAckData(message);
+        log.info("message:" + message.toString());
 
-        //sync
-        if (!StringUtils.isEmpty(from.uid)) {
-            message.type = Type.Sync.code;
-            service.getServer().getRoomOperations(from.uid).sendEvent(ConferenceApi.BASE, message);
-        }
-
-        //notify
-        message.type = Type.Notify.code;
-        service.getServer().getRoomOperations(conference.id).sendEvent(ConferenceApi.BASE, message);
+        ackSyncNotify(device, conference, message, ackSender);
     }
 
     public void join(SocketIOClient client, Message message, AckRequest ackSender) {
+        Device device = deviceService.sessions.get(client.getSessionId().toString());
         String cid = (String) message.data.get("cid");
-
         Conference conference = conferences.get(cid);
-
-        Member join = init(client);
-
+        Member join = init(device, conference);
+        join.join = System.currentTimeMillis();
         if (conference.members == null) {
-            conference.members = new ArrayList<>();
+            conference.members = new HashMap<>();
         }
-        conference.members.add(join);
+        conference.members.put(join.did, join);
 
         client.joinRoom(conference.id);
 
         message.data.put("conference", conference);
         message.data.put("from", join);
 
-        //ack
-        ackSender.sendAckData(message);
+        log.info("message:" + message.toString());
 
-        //sync
-        if (!StringUtils.isEmpty(join.uid)) {
-            message.type = Type.Sync.code;
-            service.getServer().getRoomOperations(join.uid).sendEvent(ConferenceApi.BASE, message);
-        }
-
-        //notify
-        message.type = Type.Notify.code;
-        service.getServer().getRoomOperations(conference.id).sendEvent(ConferenceApi.BASE, message);
+        ackSyncNotify(device, conference, message, ackSender);
     }
 
     public void quit(SocketIOClient client, Message message, AckRequest ackSender) {
+        Device device = deviceService.sessions.get(client.getSessionId().toString());
+        String cid = (String) message.data.get("cid");
+        Conference conference = conferences.get(cid);
+        if (conference.members == null || !conference.members.containsKey(device.did)) {
+            message.code = 404;
+            message.desc = "can't find user";
+            ackSender.sendAckData(message);
+            return;
+        }
 
+        Member quit = conference.members.remove(device.did);
+
+        client.leaveRoom(conference.id);
+
+        message.data.put("conference", conference);
+        message.data.put("from", quit);
+
+        log.info("message:" + message.toString());
+
+        ackSyncNotify(device, conference, message, ackSender);
     }
 
-    private void sdp(SocketIOClient client, Message message, AckRequest ackSende) {
+    private void ackSyncNotify(Device device, Conference conference, Message message, AckRequest ackSender) {
+        //ack
+        message.type = Type.Ack.code;
+        ackSender.sendAckData(message);
+        //sync
+        if (!StringUtils.isEmpty(device.uid)) {
+            message.type = Type.Sync.code;
+            socketService.getServer().getRoomOperations(device.uid).sendEvent(ConferenceApi.SERVICE, message);
+        }
+        //notify
+        message.type = Type.Notify.code;
+        socketService.getServer().getRoomOperations(conference.id).sendEvent(ConferenceApi.SERVICE, message);
+    }
+
+    private void route(SocketIOClient client, Message message, AckRequest ackSender) {
         String cid = (String) message.data.get("cid");
         String to = (String) message.data.get("to");
         String from = (String) message.data.get("from");
         Conference conference = conferences.get(cid);
-        if (!StringUtils.isEmpty(cid)) {//判断成员是否都在会议里面
-            service.getServer().getClient(connectService.connections.get(to).getSessionId()).sendEvent(ConferenceApi.BASE,message);
+
+        log.info("cid:" + cid + " to:" + to + " from:" +from + "\n" + conference.toString());
+
+        if (conference.members == null || !conference.members.containsKey(to) || !conference.members.containsKey(from)) {
+            message.code = 404;
+            message.desc = "can't find user";
+            ackSender.sendAckData(message);
+            return;
         }
+        message.type = Type.Notify.code;
+
+        Device dnotify = deviceService.devices.get(to);
+        if (dnotify == null) {
+            return;
+        }
+
+        SocketIOClient cnotify = socketService.getServer().getClient(UUID.fromString(dnotify.sid));
+        if (cnotify == null) {
+            return;
+        }
+
+        cnotify.sendEvent(ConferenceApi.SERVICE, message);
     }
 
-    private void candidate(SocketIOClient client, Message message, AckRequest ackSende) {
-        String cid = (String) message.data.get("cid");
-        String to = (String) message.data.get("to");
-        String from = (String) message.data.get("from");
-        Conference conference = conferences.get(cid);
-        if (!StringUtils.isEmpty(cid)) {//判断成员是否都在会议里面
-            service.getServer().getClient(connectService.connections.get(to).getSessionId()).sendEvent(ConferenceApi.BASE,message);
-        }
-    }
     int i = 100;
 
-    private Conference init(Conference conference, SocketIOClient client) {
+    private Conference init(Conference conference, Device device) {
         Conference c = conference;
         c.id = "" + (i++);
-        c.state = State.create;
         c.created = System.currentTimeMillis();
         c.maxNumber = 5;
-        c.founder = "founder";
-        c.owner = "owner";
-        c.type = com.fldys.mesh.conference.domain.Type.MESH;
+        c.founder = device.did;
+        c.owner = device.did;
         return c;
     }
 
-    private Member init(SocketIOClient client) {
+    private Member init(Device device, Conference conference) {
         Member m = new Member();
-        m.id = UUID.randomUUID().toString();
-        m.did = client.getSessionId().toString();
-        m.uid = "uid";
-        m.name = "name";
+        m.did = device.did;
+        m.cid = conference.id;
         return m;
     }
 }

@@ -18,7 +18,7 @@ import java.util.List;
 
 
 @Slf4j
-//@Service
+//@SERVICE
 public class ConnectService {
     private final int MAX_IDLE_TIME = 200;//SECOND
     private final int DEFAULT_IDLE_TIME = 120;//SECOND
@@ -44,7 +44,7 @@ public class ConnectService {
         }
         int time = Integer.valueOf(msg.payload().userName());
         log.error("ConnectService time : " + time + " deviceId:" + deviceId);
-        if (time <= 0 && deviceService.exists(deviceId)) {
+        if (time <= 0) {
             MqttConnAckMessage connAckMessage = (MqttConnAckMessage) MqttMessageFactory.newMessage(
                     new MqttFixedHeader(MqttMessageType.CONNACK, false, MqttQoS.AT_MOST_ONCE, false, 0),
                     new MqttConnAckVariableHeader(MqttConnectReturnCode.CONNECTION_REFUSED_IDENTIFIER_REJECTED, false), null);

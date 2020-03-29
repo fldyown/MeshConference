@@ -20,7 +20,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 
 @Slf4j
-//@Service
+//@SERVICE
 //@ChannelHandler.Sharable
 public class HandlerService extends SimpleChannelInboundHandler<MqttMessage> {
     @Autowired
@@ -126,8 +126,8 @@ public class HandlerService extends SimpleChannelInboundHandler<MqttMessage> {
 
         log.info("HandlerService:" + "data" + msg.payload().toString(Charset.forName("UTF-8")));
         switch (service) {
-            case DeviceApi.Register:
-            case DeviceApi.Unregister:
+            case DeviceApi.REGISTER:
+            case DeviceApi.UNREGISTER:
 //                deviceService.handler(gson.fromJson(msg.payload().toString(Charset.forName("UTF-8")), new TypeToken<Message<Device>>() {
 //                }.getType()));
                 break;

@@ -5,6 +5,7 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -18,8 +19,8 @@ public class Conference implements Serializable, Cloneable {
     public String content;                                  //内容
     public boolean security;                                //加密
     public String password;                                 //密码
-    public Type type;                                       //类型
-    public State state;                                     //会议状态
+    //    public Type type;                                 //类型
+//    public State state;                                   //会议状态
     public String avatar;                                   //头像
     public String founder;                                  //创建者
     public String owner;                                    //拥有者
@@ -28,10 +29,10 @@ public class Conference implements Serializable, Cloneable {
     public long duration;                                   //时长
     public long destroyed;                                  //销毁时间
     public long maxNumber = 5;                              //最大人数
-    public List<Member> inits;                              //初始成员
-    public List<Member> members;                            //会议成员
-    public List<Member> invites;                            //邀请人员
-    public List<Member> histories;                          //历史数据
+    public HashMap<String, Member> inits;                   //初始成员
+    public HashMap<String, Member> members;                 //会议成员
+    public HashMap<String, Member> invites;                 //邀请人员
+    public HashMap<String, Member> histories;               //历史数据
     public String extend;                                   //扩展字段
 
     @Override
@@ -47,8 +48,8 @@ public class Conference implements Serializable, Cloneable {
                 ", content='" + content + '\'' +
                 ", security=" + security +
                 ", password='" + password + '\'' +
-                ", type=" + type +
-                ", state=" + state +
+//                ", type=" + type +
+//                ", state=" + state +
                 ", avatar='" + avatar + '\'' +
                 ", founder='" + founder + '\'' +
                 ", owner='" + owner + '\'' +

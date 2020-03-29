@@ -26,7 +26,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
-//@Service
+//@SERVICE
 public class ServiceService {
     public static String TCP_SERVER;
     public static String WS_SERVER;
