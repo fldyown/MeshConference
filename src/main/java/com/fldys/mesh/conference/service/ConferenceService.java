@@ -68,7 +68,7 @@ public class ConferenceService {
 
         log.info("message:" + message.toString());
 
-        ackSyncNotify(device, conference, message, ackSender);
+        ackSyncNotify(client, message, ackSender, device, conference);
     }
 
     public void destroy(SocketIOClient client, Message message, AckRequest ackSender) {
@@ -84,7 +84,7 @@ public class ConferenceService {
 
         log.info("message:" + message.toString());
 
-        ackSyncNotify(device, conference, message, ackSender);
+        ackSyncNotify(client, message, ackSender, device, conference);
     }
 
     public void join(SocketIOClient client, Message message, AckRequest ackSender) {
@@ -105,7 +105,7 @@ public class ConferenceService {
 
         log.info("message:" + message.toString());
 
-        ackSyncNotify(device, conference, message, ackSender);
+        ackSyncNotify(client, message, ackSender, device, conference);
     }
 
     public void quit(SocketIOClient client, Message message, AckRequest ackSender) {
@@ -128,21 +128,21 @@ public class ConferenceService {
 
         log.info("message:" + message.toString());
 
-        ackSyncNotify(device, conference, message, ackSender);
+        ackSyncNotify(client, message, ackSender, device, conference);
     }
 
-    private void ackSyncNotify(Device device, Conference conference, Message message, AckRequest ackSender) {
+    private void ackSyncNotify(SocketIOClient excluded, Message message, AckRequest ackSender, Device device, Conference conference) {
         //ack
         message.type = Type.Ack.code;
         ackSender.sendAckData(message);
         //sync
         if (!StringUtils.isEmpty(device.uid)) {
             message.type = Type.Sync.code;
-            socketService.getServer().getRoomOperations(device.uid).sendEvent(ConferenceApi.SERVICE, message);
+            socketService.getServer().getRoomOperations(device.uid).sendEvent(ConferenceApi.SERVICE, excluded, message);
         }
         //notify
         message.type = Type.Notify.code;
-        socketService.getServer().getRoomOperations(conference.id).sendEvent(ConferenceApi.SERVICE, message);
+        socketService.getServer().getRoomOperations(conference.id).sendEvent(ConferenceApi.SERVICE, excluded, message);
     }
 
     private void route(SocketIOClient client, Message message, AckRequest ackSender) {
@@ -151,7 +151,7 @@ public class ConferenceService {
         String from = (String) message.data.get("from");
         Conference conference = conferences.get(cid);
 
-        log.info("cid:" + cid + " to:" + to + " from:" +from + "\n" + conference.toString());
+        log.info("cid:" + cid + " to:" + to + " from:" + from + "\n" + conference.toString());
 
         if (conference.members == null || !conference.members.containsKey(to) || !conference.members.containsKey(from)) {
             message.code = 404;

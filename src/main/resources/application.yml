@@ -54,3 +54,5 @@ socket:
 #    login: /auth/login
 #    refresh: /auth/refresh
 #    register: /auth/register
+
+# keytool -genkeypair -keyalg RSA -alias thekeystore -keystore keystore.jks -storepass changeit -keysize 2048

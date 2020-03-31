@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 
+import java.io.InputStream;
 import java.net.URLDecoder;
 import java.util.Base64;
 import java.util.List;
@@ -50,6 +51,9 @@ public class SocketConfig {
         configuration.setTransports(Transport.WEBSOCKET, Transport.POLLING);
         configuration.setPort(port);
 //        configuration.setOrigin("http://192.168.31.30:7777");
+//        configuration.setKeyStorePassword("changeit");
+//        InputStream stream = SocketConfig.class.getResourceAsStream("/mesh.jks");
+//        configuration.setKeyStore(stream);
         configuration.setPingInterval(ping);
         configuration.setPingTimeout(timeout);
         configuration.setAllowCustomRequests(custom);
