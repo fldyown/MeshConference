@@ -5,8 +5,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class UserApi {
-    public static final String Login = "user/login";                      //登录
-    public static final String Code = "user/code";                        //登出
+    public final static String SERVICE = "user";                        //用户
+    public static final String Login = "user/login";                    //登录
+    public static final String Code = "user/code";                      //登出
 
     private static List<String> events = new ArrayList<>();
 

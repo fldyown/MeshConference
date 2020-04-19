@@ -121,6 +121,12 @@ public class ConferenceService {
 
         Member quit = conference.members.remove(device.did);
 
+        if (conference.histories == null) {
+            conference.histories = new HashMap<>();
+        }
+
+        conference.histories.put(quit.did, quit);
+
         client.leaveRoom(conference.id);
 
         message.data.put("conference", conference);

@@ -4,9 +4,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 /**
  * 会议
@@ -38,31 +36,5 @@ public class Conference implements Serializable, Cloneable {
     @Override
     public Object clone() throws CloneNotSupportedException {
         return super.clone();
-    }
-
-    @Override
-    public String toString() {
-        return "Conference{" +
-                "id='" + id + '\'' +
-                ", subject='" + subject + '\'' +
-                ", content='" + content + '\'' +
-                ", security=" + security +
-                ", password='" + password + '\'' +
-//                ", type=" + type +
-//                ", state=" + state +
-                ", avatar='" + avatar + '\'' +
-                ", founder='" + founder + '\'' +
-                ", owner='" + owner + '\'' +
-                ", created=" + created +
-                ", started=" + started +
-                ", duration=" + duration +
-                ", destroyed=" + destroyed +
-                ", maxNumber=" + maxNumber +
-                ", inits=" + inits +
-                ", members=" + members +
-                ", invites=" + invites +
-                ", histories=" + histories +
-                ", extend='" + extend + '\'' +
-                '}';
     }
 }

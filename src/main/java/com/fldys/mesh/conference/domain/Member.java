@@ -28,7 +28,7 @@ public class Member implements Serializable, Cloneable {
     public boolean speak = true;                   //是否可以说
     public boolean hear = true;                    //是否可以听
     public boolean watch = true;                   //是否可以看
-    public boolean video = true;                  //是否开启视频
+    public boolean video = true;                   //是否开启视频
     public boolean audio = true;                   //是否开启音频
 
     @Override

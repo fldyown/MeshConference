@@ -65,7 +65,7 @@ jib {
         image = 'registry.hub.docker.com/fldy/helloword'
         auth {
             username = 'fldy'
-            
+            password = 'JZQ520'
         }
 //        credHelper = 'osxkeychain'
     }

@@ -43,7 +43,7 @@ socket:
   work: 10
   custom: true
   upgrade: 10000
-  timeout: 11000
+  timeout: 30000
   ping: 60000
 
 #jwt:
