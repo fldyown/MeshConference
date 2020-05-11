@@ -1,13 +1,13 @@
 spring:
   redis:
     host: 47.52.131.122
-    port: 6379
+    port: 6380
+    password: 123457
     lettuce:
       pool:
+        max-active: 10
         max-idle: 2
         min-idle: 0
-        max-active: 2
-    password: 123457
     #f0d5cc13ace35a044e324b5e545e0f43cad9181ddcb22367c1decf3ca78eb968
 
   data:
@@ -37,14 +37,14 @@ mqtt:
 
 socket:
   host: 0.0.0.0
-  port: 7777
+  port: 8888
   length: 10240000
   boss: 1
   work: 10
   custom: true
   upgrade: 10000
-  timeout: 30000
-  ping: 60000
+  timeout: 31000
+  ping: 15000
 
 #jwt:
 #  header: jwtHeader

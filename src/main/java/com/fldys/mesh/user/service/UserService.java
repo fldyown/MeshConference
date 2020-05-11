@@ -1,8 +1,5 @@
 package com.fldys.mesh.user.service;
 
-import com.corundumstudio.socketio.AckRequest;
-import com.corundumstudio.socketio.SocketIOClient;
-import com.corundumstudio.socketio.annotation.OnEvent;
 import com.fldys.mesh.user.domain.User;
 import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
@@ -16,15 +13,13 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
-import java.io.Serializable;
-
 @Slf4j
 @Service
 public class UserService {
     @Autowired
     private MongoTemplate mongo;
     @Autowired
-    private RedisTemplate<String, Serializable> template;
+    private RedisTemplate<String, Object> template;
     @Value("${spring.mail.username}")
     private String username;
     @Autowired

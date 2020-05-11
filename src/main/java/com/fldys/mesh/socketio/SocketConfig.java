@@ -57,8 +57,9 @@ public class SocketConfig {
 //            configuration.setKeyStore(stream);
 //        } catch (Exception e){}
 //        configuration.setKeyStorePassword("mesh123");
-//        configuration.setPingInterval(ping);//采用默认值ping 25
+//        configuration.setPingInterval(ping);
 //        configuration.setUpgradeTimeout(upgrade);
+        configuration.setPingInterval(ping);
         configuration.setPingTimeout(timeout);
         configuration.setAllowCustomRequests(custom);
         configuration.setBossThreads(boss);
@@ -72,7 +73,7 @@ public class SocketConfig {
                     String did = data.getSingleUrlParam("did");
                     log.info("did:" + did);
 //                    String d = new String(Base64.getDecoder().decode(URLDecoder.decode(did)), "UTF-8");
-                    String d = URLDecoder.decode(did);
+                    String d = URLDecoder.decode(did, "UTF-8");
                     if (d.length() < 36) {
                         return false;
                     }

@@ -6,6 +6,7 @@ public class ConferenceApi {
     public final static String DESTROY = "destroy";              //销毁
     public final static String JOIN = "join";                    //加入
     public final static String QUIT = "quit";                    //退出
+    public final static String INVITE = "invite";                //邀请
     public final static String SDP = "sdp";                      //呼叫
     public final static String CANDIDATE = "c";                  //呼叫
 }
